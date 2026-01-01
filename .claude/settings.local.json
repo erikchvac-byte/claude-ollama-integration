@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(node test-integration.js:*)",
+      "Bash(node -e:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

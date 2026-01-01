@@ -1,16 +1,25 @@
-# Claude Code + Ollama Integration
+# Claude Code + Ollama Integration v2.0
 
-**Intelligent task routing between local Ollama models (fast, free) and Claude API (deep reasoning)**
+**Self-improving task routing between local Ollama models (fast, free) and Claude API (deep reasoning)**
 
 ## What This Is
 
 A complete integration system that lets Claude Code automatically route tasks to the most appropriate model:
 - **Simple tasks** → Local Ollama models (free, 1-3s response)
 - **Complex tasks** → Claude API (accurate, deep reasoning)
+- **🆕 Self-Learning** → Tracks decisions, analyzes patterns, suggests improvements
 
 Saves $15-50/month in API costs while maintaining quality.
 
-## ✨ New Features
+## ✨ What's New in v2.0
+
+- 🧠 **Self-Improving Routing** - System learns from your usage patterns
+- 📊 **Automatic Logging** - Tracks every routing decision transparently
+- 🔍 **Pattern Analysis** - New `routing-optimizer` agent analyzes your workflow
+- 🎯 **Domain Keywords** - Better recognition of Roblox, Blender, game dev tasks
+- 💡 **Smart Suggestions** - After 20+ tasks, get personalized improvement recommendations
+
+### v1.0 Features
 
 - 🚀 **Auto-Install Hook** - Detects missing integration and offers to install automatically
 - ✅ **Verification Script** - Validates your setup with `verify.ps1`
@@ -95,8 +104,8 @@ Ollama          Claude
 
 ## Available Agents
 
-### task-router
-Analyzes complexity (0-100 score) and routes automatically:
+### task-router (v2.0)
+Analyzes complexity (0-100 score) and routes automatically. **Now logs all decisions!**
 - 0-30: Ollama Only
 - 31-55: Ollama Preferred
 - 56-70: Either works (asks user)
@@ -115,6 +124,13 @@ Deep reasoning with full Claude capabilities:
 - Complex debugging
 - Multi-file refactoring
 
+### 🆕 routing-optimizer
+Analyzes your routing patterns and suggests improvements:
+- Tracks override patterns
+- Detects keyword gaps
+- Recommends threshold adjustments
+- Uses Ollama for analysis (fast, free)
+
 ---
 
 ## Usage Examples
@@ -126,6 +142,7 @@ Just ask your question:
 "Generate unit tests for this function"
 → Analyzes complexity
 → Routes appropriately
+→ Logs decision automatically
 → Shows cost savings
 ```
 
@@ -135,14 +152,20 @@ Just ask your question:
 @ollama-specialist write hello world in Python
 @claude-specialist debug this complex architecture issue
 @task-router should I refactor this entire module?
+@routing-optimizer analyze my routing patterns  # NEW in v2.0!
 ```
 
 ### Direct MCP Tools
 
 ```
+# Task routing
 "Use analyze_task_complexity to evaluate: [your task]"
 "Use list_ollama_models"
 "Use estimate_cost_and_latency for code_review task"
+
+# NEW in v2.0: Analytics
+"Use get_routing_stats"  # See your routing statistics
+"Use analyze_routing_patterns"  # Get improvement suggestions
 ```
 
 ---
@@ -164,7 +187,27 @@ Typical savings per task:
 
 ## Installation
 
-### MCP Server Setup
+### 🆕 Upgrading from v1.0 to v2.0
+
+Already have the integration installed? Upgrade to v2.0 with one command:
+
+```powershell
+cd path\to\claude-ollama-integration
+.\upgrade-v2.ps1
+```
+
+This will:
+- ✅ Backup your existing setup
+- ✅ Install v2.0 files (domain keywords, logging, analytics)
+- ✅ Update agents (add routing-optimizer)
+- ✅ Preserve your configuration
+- ✅ Initialize routing log
+
+**Non-breaking:** All v1.0 configs continue to work!
+
+### Fresh Installation
+
+#### MCP Server Setup
 
 If the MCP server isn't installed:
 
@@ -180,7 +223,7 @@ cd ~/.claude/mcp-servers/ollama-mcp-server
 npm install
 ```
 
-### Per-Project Setup
+#### Per-Project Setup
 
 ```powershell
 # Copy MCP config

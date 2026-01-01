@@ -1,0 +1,47 @@
+{
+  "decisions": [
+    {
+      "timestamp": "2026-01-01T19:09:25.726Z",
+      "task": "Write a hello world function",
+      "score": 26,
+      "recommendation": "OLLAMA_ONLY",
+      "factors": {
+        "contextDepth": 25,
+        "reasoning": 30
+      },
+      "actualChoice": "ollama",
+      "manualOverride": false,
+      "modelUsed": "qwen2.5-coder:7b"
+    },
+    {
+      "timestamp": "2026-01-01T19:09:25.726Z",
+      "task": "Debug complex authentication issue",
+      "score": 75,
+      "recommendation": "CLAUDE_PREFERRED",
+      "factors": {
+        "contextDepth": 85,
+        "reasoning": 80
+      },
+      "actualChoice": "claude",
+      "manualOverride": false,
+      "modelUsed": "claude-sonnet-4.5"
+    },
+    {
+      "timestamp": "2026-01-01T19:09:25.727Z",
+      "task": "Simple code example",
+      "score": 28,
+      "recommendation": "OLLAMA_ONLY",
+      "factors": {
+        "contextDepth": 25,
+        "reasoning": 30
+      },
+      "actualChoice": "claude",
+      "manualOverride": true,
+      "modelUsed": "claude-sonnet-4.5"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "created": "2026-01-01T19:09:25.722Z"
+  }
+}
