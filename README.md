@@ -18,6 +18,7 @@ Saves $15-50/month in API costs while maintaining quality.
 - 🔍 **Pattern Analysis** - New `routing-optimizer` agent analyzes your workflow
 - 🎯 **Domain Keywords** - Better recognition of Roblox, Blender, game dev tasks
 - 💡 **Smart Suggestions** - After 20+ tasks, get personalized improvement recommendations
+- 🔄 **Auto-Start Ollama** - SessionStart hook automatically starts Ollama after PC restart (PowerShell-based for Windows reliability)
 
 ### v1.0 Features
 
@@ -265,12 +266,40 @@ claude-ollama-integration/
 
 ## Troubleshooting
 
-### Ollama Not Running
+### Ollama Not Auto-Starting After Restart
+
+**Expected Behavior**: SessionStart hook should auto-start Ollama when you open a project.
+
+**If it doesn't work:**
+
+1. **Check hook exists**:
+   ```powershell
+   Test-Path .claude\hooks\SessionStart.md
+   # Should return: True
+   ```
+
+2. **Manually trigger the hook** (for testing):
+   - Close and reopen VSCode/Claude Code
+   - The hook runs automatically on session start
+   - You should see: "✅ Ollama started successfully"
+
+3. **Manual start** (if hook fails):
+   ```powershell
+   ollama serve
+   # Or use Start-Process for background:
+   Start-Process -FilePath "ollama" -ArgumentList "serve" -WindowStyle Hidden
+   ```
+
+4. **Check hook is PowerShell-based**:
+   - Hook should use `powershell` code blocks, not `bash`
+   - See [SESSIONSTART_HOOK_UPDATE.md](SESSIONSTART_HOOK_UPDATE.md) for details
+
+### Ollama Not Running (Manual Check)
 ```powershell
 # Check
 curl http://localhost:11434/api/tags
 
-# Start
+# Start manually
 ollama serve
 ```
 
@@ -278,14 +307,14 @@ ollama serve
 ```powershell
 # Test manually
 node C:\Users\erikc\.claude\mcp-servers\ollama-mcp-server\index.js
-# Should output: "Ollama MCP Server started successfully"
+# Should output: "Ollama MCP Server v2.0 started successfully (with routing logger)"
 ```
 
 ### Agents Not Showing
 ```powershell
 # Verify files exist
 ls .claude/agents/
-# Should show: task-router.md, ollama-specialist.md, claude-specialist.md
+# Should show: task-router.md, ollama-specialist.md, claude-specialist.md, routing-optimizer.md
 
 # Restart Claude Code
 ```
