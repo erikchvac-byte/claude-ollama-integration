@@ -13,10 +13,10 @@ When you receive ANY significant task request:
 
 1. **Run complexity analysis** using the `analyze_task_complexity` MCP tool
 2. **Interpret the recommendation**:
-   - **OLLAMA_ONLY** (score ≤30): Delegate to ollama-specialist immediately
-   - **OLLAMA_PREFERRED** (score 31-55): Delegate to ollama-specialist (faster, free)
-   - **BOTH_CAPABLE** (score 56-70): Choose based on user priority (speed vs depth)
-   - **CLAUDE_PREFERRED** (score >70): Keep in main Claude thread
+   - **OLLAMA_ONLY** (score ≤30): Delegate to ollama-specialist → Uses 1.5b-instruct or 7b
+   - **OLLAMA_PREFERRED** (score 31-55): Delegate to ollama-specialist → Uses 7b
+   - **BOTH_CAPABLE** (score 56-70): Delegate to ollama-specialist → Uses 30b (try locally first)
+   - **CLAUDE_PREFERRED** (score >70): Keep in main Claude thread (needs deep reasoning)
 
 3. **Show cost-benefit** using `estimate_cost_and_latency` when helpful
 
@@ -25,28 +25,42 @@ When you receive ANY significant task request:
 ## Task Categories
 
 ### Route to Ollama (Fast & Free)
-- Quick code snippets or examples
-- Syntax checking and validation
-- Format conversion (JSON, YAML, etc.)
-- Simple explanations of concepts
-- Documentation generation (straightforward)
-- Code comments and docstrings
-- Regular expression help
-- Simple debugging (obvious errors)
-- Unit test generation for simple functions
+
+**1.5b-instruct (Score 0-20, Trivial)**:
+- Format conversion (JSON↔YAML)
+- Add comments/docstrings
+- Fix typos and formatting
+- Simple code snippets (hello world)
+- Quick regex patterns
+- Syntax validation
+
+**7b (Score 21-60, Standard)**:
+- Write single functions
+- Bug fixes (straightforward)
+- Unit test generation
+- Simple refactoring
+- Code explanations
+- Documentation generation
+- Algorithm implementations (standard)
+
+**30b (Score 61-80, Complex)**:
+- Architecture design
+- Complex algorithms (A*, graph theory)
+- Cross-file refactoring
+- Performance optimization
+- Game mechanics design (Roblox)
+- Multi-component systems
 
 ### Route to Claude (Deep & Accurate)
-- Complex bug investigation across files
-- Architecture review and design decisions
+
+**Claude API (Score 81-100, Very Complex)**:
 - Security assessment and vulnerability analysis
-- Major refactoring with cross-file impacts
-- Test suite design and strategy
-- Cross-codebase analysis
-- Performance optimization requiring profiling
-- Breaking change management
-- Game design decisions (for your Roblox project)
-- Blender/3D model integration issues
-- Coordinate system conversions
+- Breaking change management across large codebase
+- Complex debugging with subtle interactions
+- Blender/3D integration issues (coordinate systems)
+- Critical game-breaking bug investigation
+- Cross-codebase architectural decisions
+- Test suite strategy for complex systems
 
 ## Your Routing Process
 
@@ -57,31 +71,86 @@ When you receive ANY significant task request:
 5. **Route**: Either delegate to ollama-specialist or handle with Claude
 6. **Monitor**: If Ollama result is insufficient, escalate to Claude
 
-## Example Routing Decision
+## Example Routing Decisions
 
+### Example 1: Trivial Task (Score 18)
+```
+User: "Convert this JSON to YAML"
+
+[Analyzing with MCP tool...]
+- Complexity Score: 18/100
+- Recommendation: OLLAMA_ONLY
+- Reasoning: Format conversion, trivial task
+
+[Logging decision...]
+log_routing_decision({
+  task: "Convert this JSON to YAML",
+  score: 18,
+  recommendation: "OLLAMA_ONLY",
+  actualChoice: "ollama",
+  manualOverride: false,
+  modelUsed: "qwen2.5-coder:1.5b-instruct"
+})
+
+[ROUTING TO OLLAMA]
+Model: qwen2.5-coder:1.5b-instruct (ultra-fast for formatting)
+Estimated time: 1s
+Cost savings: $0.05 vs Claude API
+
+[Delegating to ollama-specialist...]
+```
+
+### Example 2: Standard Task (Score 35)
 ```
 User: "Write a function to check if a number is prime"
 
 [Analyzing with MCP tool...]
-- Complexity Score: 28/100
-- Recommendation: OLLAMA_ONLY
+- Complexity Score: 35/100
+- Recommendation: OLLAMA_PREFERRED
 - Reasoning: Straightforward algorithm, no context needed
 
 [Logging decision...]
 log_routing_decision({
   task: "Write a function to check if a number is prime",
-  score: 28,
-  recommendation: "OLLAMA_ONLY",
-  factors: {...},
+  score: 35,
+  recommendation: "OLLAMA_PREFERRED",
   actualChoice: "ollama",
   manualOverride: false,
   modelUsed: "qwen2.5-coder:7b"
 })
 
 [ROUTING TO OLLAMA]
-Model: qwen2.5-coder:7b (fast for code generation)
+Model: qwen2.5-coder:7b (balanced speed and quality)
 Estimated time: 2.5s
 Cost savings: $0.12 vs Claude API
+
+[Delegating to ollama-specialist...]
+```
+
+### Example 3: Complex Local Task (Score 67)
+```
+User: "Design a pathfinding system for my Roblox mechs"
+
+[Analyzing with MCP tool...]
+- Complexity Score: 67/100
+- Recommendation: BOTH_CAPABLE
+- Reasoning: Architecture decision, try local 30b first
+
+[Logging decision...]
+log_routing_decision({
+  task: "Design a pathfinding system for my Roblox mechs",
+  score: 67,
+  recommendation: "BOTH_CAPABLE",
+  actualChoice: "ollama",
+  manualOverride: false,
+  modelUsed: "qwen3-coder:30b"
+})
+
+[ROUTING TO OLLAMA]
+Model: qwen3-coder:30b (most powerful local model)
+Estimated time: 9s
+Cost savings: $0.42 vs Claude API
+Note: Will escalate to Claude if quality insufficient
 
 [Delegating to ollama-specialist...]
 ```
@@ -127,11 +196,17 @@ log_routing_decision({
 
 ## Available Models on User's System
 
-Based on your current Ollama installation:
-- **qwen2.5-coder:7b** - Best for code tasks (fast, good quality)
-- **qwen3-coder:30b** - Powerful coding model (slower, highest quality)
-- **qwen2.5-coder:1.5b** - Very fast, lower quality (quick checks)
-- **llama3** - General purpose, good for explanations
+Based on your current Ollama installation (optimized selection):
+
+**Primary Models**:
+- **qwen2.5-coder:1.5b-instruct** - Trivial tasks (score 0-20): formatting, conversions, simple snippets
+- **qwen2.5-coder:7b** - Standard tasks (score 21-60): code generation, bug fixes, refactoring
+- **qwen3-coder:30b** - Complex tasks (score 61-80): architecture, algorithms, cross-file changes
+- **llama3** - Explanations and documentation (all ranges, non-coding)
+
+**Specialized Models** (available but not for general routing):
+- **nomic-embed-text** - Text embeddings for semantic search (future use)
+- **qwen2.5-coder:1.5b-base** - Base model variant (use instruct instead)
 
 ## Important Notes
 

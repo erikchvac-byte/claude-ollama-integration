@@ -33,19 +33,22 @@ Force all requests to use Ollama regardless of complexity:
 
 Choose which Ollama model to use based on task complexity:
 
-**For Simple Tasks** (use fast model):
+**For Trivial Tasks** (use ultra-fast model):
 ```
-Use ollama_query with model qwen2.5-coder:1.5b to write a hello world function
+Use ollama_query with model qwen2.5-coder:1.5b-instruct to convert JSON to YAML
+Use ollama_query with model qwen2.5-coder:1.5b-instruct to add comments
 ```
 
-**For Moderate Tasks** (use balanced model):
+**For Simple Tasks** (use balanced model):
 ```
+Use ollama_query with model qwen2.5-coder:7b to write a hello world function
 Use ollama_query with model qwen2.5-coder:7b to implement a sorting algorithm
 ```
 
 **For Complex Tasks** (use powerful model):
 ```
 Use ollama_query with model qwen3-coder:30b to refactor this module
+Use ollama_query with model qwen3-coder:30b to design an architecture
 ```
 
 **For Explanations** (use general model):
@@ -61,10 +64,10 @@ Based on your Ollama installation:
 
 | Model | Size | Best For | Speed |
 |-------|------|----------|-------|
-| **qwen2.5-coder:1.5b** | 0.99 GB | Quick code snippets, syntax checks | ⚡ Very Fast (1-2s) |
-| **qwen2.5-coder:7b** | 4.68 GB | General coding tasks, algorithms | 🚀 Fast (2-4s) |
-| **qwen3-coder:30b** | 18.56 GB | Complex refactoring, architecture | 🐢 Slower (5-10s) |
-| **llama3** | 4.66 GB | Explanations, documentation | 🚀 Fast (2-4s) |
+| **qwen2.5-coder:1.5b-instruct** | 0.99 GB | Format conversion, comments, trivial tasks | ⚡ Very Fast (1s) |
+| **qwen2.5-coder:7b** | 4.68 GB | General coding tasks, algorithms, bug fixes | 🚀 Fast (2-3s) |
+| **qwen3-coder:30b** | 18.56 GB | Complex refactoring, architecture, algorithms | 🐢 Slower (8-12s) |
+| **llama3** | 4.66 GB | Explanations, documentation | 🚀 Fast (2-3s) |
 
 ---
 
@@ -136,25 +139,29 @@ Prefer local models (Ollama) for all tasks unless I specifically ask for Claude
 
 ## When to Use Each Model
 
-### qwen2.5-coder:1.5b (Ultra Fast)
-- "Write a function to add two numbers"
-- "Fix this syntax error"
+### qwen2.5-coder:1.5b-instruct (Ultra Fast - Trivial Tasks)
 - "Convert this JSON to YAML"
-- Quick validations
+- "Add comments to this function"
+- "Fix this typo"
+- "Format this code"
+- Quick validations and formatting
 
-### qwen2.5-coder:7b (Balanced)
+### qwen2.5-coder:7b (Balanced - Simple & Moderate Tasks)
+- "Write a function to add two numbers"
 - "Implement a binary search"
 - "Write unit tests for this function"
 - "Debug this loop"
+- "Fix this syntax error"
 - General coding tasks
 
-### qwen3-coder:30b (Powerful)
+### qwen3-coder:30b (Powerful - Complex Tasks)
 - "Refactor this module for better patterns"
 - "Optimize this algorithm"
 - "Review this architecture"
+- "Design a pathfinding system"
 - Complex problem-solving
 
-### llama3 (Explanatory)
+### llama3 (Explanatory - Documentation)
 - "Explain how this works"
 - "Document this API"
 - "Write a README"
