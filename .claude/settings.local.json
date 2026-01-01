@@ -5,7 +5,11 @@
       "Bash(cat:*)",
       "Bash(node test-integration.js:*)",
       "Bash(node -e:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File ./upgrade-v2.ps1)",
+      "Bash(mv:*)",
+      "Bash(node index.js:*)"
     ]
   }
 }
