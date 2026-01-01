@@ -10,6 +10,13 @@ A complete integration system that lets Claude Code automatically route tasks to
 
 Saves $15-50/month in API costs while maintaining quality.
 
+## ✨ New Features
+
+- 🚀 **Auto-Install Hook** - Detects missing integration and offers to install automatically
+- ✅ **Verification Script** - Validates your setup with `verify.ps1`
+- 📦 **One-Command Install** - `.\install.ps1` sets up any project instantly
+- 📖 **Conversation Log** - Full design decisions in [CONVERSATION.md](CONVERSATION.md)
+
 ---
 
 ## Quick Start (5 Minutes)
