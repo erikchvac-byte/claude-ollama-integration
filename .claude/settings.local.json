@@ -9,7 +9,18 @@
       "Bash(git commit:*)",
       "Bash(powershell -ExecutionPolicy Bypass -File ./upgrade-v2.ps1)",
       "Bash(mv:*)",
-      "Bash(node index.js:*)"
+      "Bash(node index.js:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(gh --version:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File ./push-to-github.ps1)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(powershell -Command \"Start-Process ''ollama'' -ArgumentList ''serve'' -WindowStyle Hidden\")",
+      "Bash(tasklist:*)",
+      "Bash(powershell -Command \"Get-Process ollama | Select-Object Id,ProcessName,StartTime,Path | Format-List\")",
+      "Bash(powershell -Command \"Get-ScheduledTask | Where-Object {$_TaskName -like ''*ollama*''} | Format-Table TaskName,State\")",
+      "Bash(reg query \"HKCU\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\")"
     ]
   }
 }

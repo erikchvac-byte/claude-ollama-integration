@@ -83,16 +83,22 @@ if [ -f ".mcp.json" ] && [ ! -d ".claude/agents" ]; then
 fi
 ```
 
-## Check 3: Verify Ollama is running
+## Check 3: Auto-start Ollama if not running
 
 ```bash
 if [ -f ".mcp.json" ]; then
     if ! curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-        echo "⚠️  Ollama is not running!"
-        echo ""
-        echo "Start Ollama with:"
-        echo "  Windows: C:\\Users\\erikc\\start-ollama.ps1"
-        echo "  Or: ollama serve"
+        echo "🚀 Starting Ollama service..."
+        powershell -Command "Start-Process 'ollama' -ArgumentList 'serve' -WindowStyle Hidden" > /dev/null 2>&1
+        sleep 2
+
+        # Verify it started
+        if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
+            echo "✅ Ollama started successfully"
+        else
+            echo "⚠️  Failed to start Ollama automatically"
+            echo "   Please start manually: ollama serve"
+        fi
     fi
 fi
 ```
