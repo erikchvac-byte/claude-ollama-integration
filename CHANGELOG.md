@@ -2,6 +2,37 @@
 
 All notable changes to the Claude + Ollama Integration will be documented in this file.
 
+## [2.0.1] - 2026-01-01
+
+### 📖 Documentation Updates
+
+#### Critical Setup Instructions
+- **BREAKING CLARITY**: Added prominent warning about MCP server configuration location
+  - MCP servers MUST be in `~/.claude.json` (via `claude mcp add` command)
+  - MCP servers in `settings.json` will NOT work with VSCode extension
+  - Updated Quick Start to use CLI registration instead of manual config
+
+#### Troubleshooting Enhancements
+- Added "MCP Servers in Wrong File" as top troubleshooting item
+- Clarified difference between `settings.json` (preferences) and `.claude.json` (MCP servers)
+- Added complete fix instructions with verification steps
+- Documented requirement to fully restart VSCode after MCP changes
+
+#### Installation Updates
+- Removed outdated `.mcp.json` references (user-scoped servers work globally)
+- Simplified project setup (agents only, no per-project MCP config needed)
+- Added `claude mcp list` verification step to Quick Start
+
+### 🐛 Bug Fixes
+- Identified and documented the most common installation failure: wrong config file location
+
+### ⚠️ Migration Notes
+If you previously configured MCP servers in `settings.json`:
+1. Remove `mcpServers` section from `~/.claude/settings.json`
+2. Run: `claude mcp add --scope user --transport stdio ollama-local -- node "~/.claude/mcp-servers/ollama-mcp-server/index.js"`
+3. Verify: `claude mcp list`
+4. Restart VSCode completely
+
 ## [2.0.0] - 2026-01-01
 
 ### 🚀 New Features

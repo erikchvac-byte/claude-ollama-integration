@@ -36,27 +36,34 @@ Saves $15-50/month in API costs while maintaining quality.
 - Ollama installed and running (`ollama serve`)
 - Node.js installed
 
-### 1. Verify MCP Server Exists
+### 1. Install MCP Server Globally
 
-The MCP server should already be installed at:
-```
-C:\Users\erikc\.claude\mcp-servers\ollama-mcp-server\
-```
-
-If not, see [MCP Server Setup](#mcp-server-setup) below.
-
-### 2. Add to Your Project
-
-Copy these files to your project:
+**Important:** MCP servers must be registered via the Claude CLI, not manually configured in settings files.
 
 ```powershell
-# Minimal setup (MCP tools only)
-cp mcp.json.template YOUR_PROJECT/.mcp.json
+# Add the MCP server to your global Claude configuration
+claude mcp add --scope user --transport stdio ollama-local -- node "C:\Users\erikc\.claude\mcp-servers\ollama-mcp-server\index.js"
 
-# Full setup (with intelligent routing agents)
-cp mcp.json.template YOUR_PROJECT/.mcp.json
-cp -r agents/ YOUR_PROJECT/.claude/agents/
+# Verify it was added
+claude mcp list
+# Should show: ollama-local: ... - ✓ Connected
 ```
+
+This adds the server to `~/.claude.json` (user scope), making it available across all projects.
+
+If the MCP server files don't exist yet, see [MCP Server Setup](#mcp-server-setup) below.
+
+### 2. (Optional) Add Routing Agents to Your Project
+
+The MCP server is now globally available! For enhanced routing intelligence, add the custom agents:
+
+```powershell
+# Copy routing agents to your project
+mkdir -p YOUR_PROJECT/.claude/agents
+cp agents/*.md YOUR_PROJECT/.claude/agents/
+```
+
+**Note:** You don't need `.mcp.json` files anymore! User-scoped MCP servers work across all projects automatically.
 
 ### 3. Start Using
 
@@ -266,6 +273,24 @@ claude-ollama-integration/
 
 ## Troubleshooting
 
+### ⚠️ CRITICAL: MCP Servers in Wrong File
+
+**Most common mistake:** Putting MCP servers in `settings.json` instead of `.claude.json`
+
+❌ **Wrong:** `C:\Users\erikc\.claude\settings.json` - MCP servers here won't work!
+✅ **Correct:** `C:\Users\erikc\.claude.json` - MCP servers must be here
+
+**How to fix:**
+1. Remove any `mcpServers` section from `settings.json`
+2. Use CLI to properly register: `claude mcp add --scope user --transport stdio ollama-local -- node "C:\Users\erikc\.claude\mcp-servers\ollama-mcp-server\index.js"`
+3. Verify with `claude mcp list`
+4. Restart VSCode completely
+
+**Why this matters:**
+- `settings.json` = Claude Code preferences (themes, editor settings)
+- `.claude.json` = User state, MCP servers, session data
+- The VSCode extension **only** reads MCP servers from `.claude.json`, never from `settings.json`
+
 ### Ollama Not Auto-Starting After Restart
 
 **Recommended Solution**: Windows Scheduled Task (most reliable)
@@ -302,10 +327,22 @@ ollama serve
 ```
 
 ### MCP Server Not Loading
+
+**Common Issue:** MCP servers in `settings.json` won't work! They must be in `.claude.json`.
+
 ```powershell
-# Test manually
+# Verify server is registered correctly
+claude mcp list
+# Should show: ollama-local: ... - ✓ Connected
+
+# If not listed, add it:
+claude mcp add --scope user --transport stdio ollama-local -- node "C:\Users\erikc\.claude\mcp-servers\ollama-mcp-server\index.js"
+
+# Test server manually
 node C:\Users\erikc\.claude\mcp-servers\ollama-mcp-server\index.js
 # Should output: "Ollama MCP Server v2.0 started successfully (with routing logger)"
+
+# Restart VSCode completely (Ctrl+Shift+P → "Developer: Reload Window")
 ```
 
 ### Agents Not Showing
