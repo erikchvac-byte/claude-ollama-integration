@@ -18,7 +18,7 @@ Saves $15-50/month in API costs while maintaining quality.
 - 🔍 **Pattern Analysis** - New `routing-optimizer` agent analyzes your workflow
 - 🎯 **Domain Keywords** - Better recognition of Roblox, Blender, game dev tasks
 - 💡 **Smart Suggestions** - After 20+ tasks, get personalized improvement recommendations
-- 🔄 **Auto-Start Ollama** - SessionStart hook automatically starts Ollama after PC restart (PowerShell-based for Windows reliability)
+- 🔄 **Auto-Start Ollama** - Windows Scheduled Task ensures Ollama starts on login (most reliable for Windows)
 
 ### v1.0 Features
 
@@ -268,31 +268,29 @@ claude-ollama-integration/
 
 ### Ollama Not Auto-Starting After Restart
 
-**Expected Behavior**: SessionStart hook should auto-start Ollama when you open a project.
+**Recommended Solution**: Windows Scheduled Task (most reliable)
 
-**If it doesn't work:**
+**Setup auto-start** (one-time):
+```powershell
+cd C:\Users\erikc\Dev\claude-ollama-integration
+.\create-ollama-startup-task.ps1
+```
 
-1. **Check hook exists**:
-   ```powershell
-   Test-Path .claude\hooks\SessionStart.md
-   # Should return: True
-   ```
+This creates a Windows task that starts Ollama automatically when you log in.
 
-2. **Manually trigger the hook** (for testing):
-   - Close and reopen VSCode/Claude Code
-   - The hook runs automatically on session start
-   - You should see: "✅ Ollama started successfully"
+**Verify task exists**:
+```powershell
+Get-ScheduledTask -TaskName "OllamaAutoStart"
+```
 
-3. **Manual start** (if hook fails):
-   ```powershell
-   ollama serve
-   # Or use Start-Process for background:
-   Start-Process -FilePath "ollama" -ArgumentList "serve" -WindowStyle Hidden
-   ```
+**Manual start** (if needed):
+```powershell
+ollama serve
+# Or background:
+Start-Process -FilePath "ollama" -ArgumentList "serve" -WindowStyle Hidden
+```
 
-4. **Check hook is PowerShell-based**:
-   - Hook should use `powershell` code blocks, not `bash`
-   - See [SESSIONSTART_HOOK_UPDATE.md](SESSIONSTART_HOOK_UPDATE.md) for details
+See [WINDOWS_STARTUP_TASK.md](WINDOWS_STARTUP_TASK.md) for complete details.
 
 ### Ollama Not Running (Manual Check)
 ```powershell
