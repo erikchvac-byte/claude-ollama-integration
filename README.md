@@ -11,7 +11,14 @@ A complete integration system that lets Claude Code automatically route tasks to
 
 Saves $15-50/month in API costs while maintaining quality.
 
-## ✨ What's New in v2.0
+## ✨ What's New in v2.1
+
+- 🌍 **Global Agent Setup** - Install agents once, use everywhere (recommended)
+- 🤖 **Proactive Routing** - Claude automatically uses task-router for simple tasks
+- 🚀 **Zero Per-Project Config** - No more copying files to every project
+- ✨ **Session Persistence** - Routing works across all conversations automatically
+
+### v2.0 Features
 
 - 🧠 **Self-Improving Routing** - System learns from your usage patterns
 - 📊 **Automatic Logging** - Tracks every routing decision transparently
@@ -29,7 +36,7 @@ Saves $15-50/month in API costs while maintaining quality.
 
 ---
 
-## Quick Start (5 Minutes)
+## Quick Start (3 Minutes - Global Setup)
 
 ### Prerequisites
 - Claude Code (VSCode extension or CLI)
@@ -53,27 +60,42 @@ This adds the server to `~/.claude.json` (user scope), making it available acros
 
 If the MCP server files don't exist yet, see [MCP Server Setup](#mcp-server-setup) below.
 
-### 2. (Optional) Add Routing Agents to Your Project
+### 2. Install Routing Agents Globally (Recommended)
 
-The MCP server is now globally available! For enhanced routing intelligence, add the custom agents:
+**NEW:** Install agents globally so they're available in every project automatically:
 
 ```powershell
-# Copy routing agents to your project
-mkdir -p YOUR_PROJECT/.claude/agents
-cp agents/*.md YOUR_PROJECT/.claude/agents/
+# Copy routing agents to your global Claude directory
+cp agents/*.md ~/.claude/agents/
+# Or on Windows:
+cp agents/*.md C:\Users\YOUR_USERNAME\.claude\agents\
 ```
+
+**Why global?**
+- ✅ Works in every project, every conversation
+- ✅ No per-project setup needed
+- ✅ Always available via @mention
 
 **Note:** You don't need `.mcp.json` files anymore! User-scoped MCP servers work across all projects automatically.
 
 ### 3. Start Using
 
-Restart Claude Code, then just ask questions normally:
+Restart Claude Code (or VS Code), then choose your preferred workflow:
 
+**Option A: Proactive Routing (Recommended)**
 ```
-"Write a function to calculate distance"
-→ Auto-routes to Ollama (qwen2.5-coder:7b)
+You: "Write a function to calculate distance"
+Claude: [Automatically uses @task-router for simple tasks]
+→ Routes to Ollama (qwen2.5-coder:7b)
 → Returns in ~2s
 → Cost savings: $0.08
+```
+
+**Option B: Manual Agent Invocation**
+```
+@task-router Write a function to calculate distance
+→ Analyzes complexity
+→ Routes to appropriate model
 ```
 
 ---
@@ -97,16 +119,19 @@ Ollama          Claude
 
 1. **MCP Server** (`~/.claude/mcp-servers/ollama-mcp-server/`)
    - Exposes Ollama as MCP tools
-   - Global, works for all projects
+   - Registered globally via CLI (`claude mcp add`)
+   - Works for all projects automatically
 
-2. **Custom Agents** (`agents/`)
+2. **Custom Agents** (`~/.claude/agents/` - **GLOBAL INSTALL RECOMMENDED**)
    - `task-router.md` - Analyzes & routes tasks
    - `ollama-specialist.md` - Runs on Ollama
    - `claude-specialist.md` - Handles complex tasks
+   - `routing-optimizer.md` - Analyzes routing patterns
+   - Available everywhere when installed globally
 
-3. **MCP Config** (`mcp.json.template`)
-   - Copy to project as `.mcp.json`
-   - Enables MCP server for that project
+3. **Per-Project Config** (OPTIONAL - not needed for global setup)
+   - `.mcp.json` - Only needed if you want project-specific MCP servers
+   - Project-level agents in `.claude/agents/` - Only if you want project-specific routing
 
 ---
 
@@ -143,25 +168,41 @@ Analyzes your routing patterns and suggests improvements:
 
 ## Usage Examples
 
-### Automatic Routing (Recommended)
+### Proactive Routing (Recommended - v2.1+)
 
-Just ask your question:
+**Global agents installed:** Claude automatically uses task-router for simple tasks!
+
 ```
-"Generate unit tests for this function"
-→ Analyzes complexity
-→ Routes appropriately
-→ Logs decision automatically
-→ Shows cost savings
+You: "Generate unit tests for this function"
+Claude: [Uses @task-router automatically]
+→ Analyzes complexity (score: 35/100)
+→ Routes to Ollama (qwen2.5-coder:7b)
+→ Returns in ~2.5s
+→ Cost savings: $0.12
 ```
+
+**Tip:** Remind Claude at session start: "Use task-router for simple tasks"
 
 ### Manual Agent Selection
 
 ```
+@task-router should I refactor this entire module?
 @ollama-specialist write hello world in Python
 @claude-specialist debug this complex architecture issue
-@task-router should I refactor this entire module?
 @routing-optimizer analyze my routing patterns  # NEW in v2.0!
 ```
+
+### Global vs Per-Project
+
+**Global Setup (Recommended):**
+- Agents installed in `~/.claude/agents/`
+- Works everywhere, no per-project setup
+- Consistent routing across all projects
+
+**Per-Project Setup (Advanced):**
+- Agents in `PROJECT/.claude/agents/`
+- Project-specific routing rules
+- Can override global behavior
 
 ### Direct MCP Tools
 

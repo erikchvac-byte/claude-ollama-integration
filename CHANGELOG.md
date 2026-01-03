@@ -2,6 +2,44 @@
 
 All notable changes to the Claude + Ollama Integration will be documented in this file.
 
+## [2.1.0] - 2026-01-02
+
+### 🌍 Global Agent Setup (Major Enhancement)
+
+#### New Recommended Installation Method
+- **Global Agents**: Install routing agents to `~/.claude/agents/` once, use everywhere
+  - No more per-project agent copying
+  - Works in every conversation, every directory
+  - Consistent routing across all projects
+  - Agents: `task-router`, `ollama-specialist`, `claude-specialist`, `routing-optimizer`
+
+#### Proactive Routing Workflow
+- **New: Proactive Agent Usage**: Claude can now automatically invoke `@task-router` for simple tasks
+  - No manual `@mention` required for every request
+  - User can remind Claude: "Use task-router for simple tasks"
+  - More natural conversation flow
+  - Still supports manual `@task-router` invocation when desired
+
+### 📖 Documentation Updates
+- Updated README with global installation instructions
+- Added "Global vs Per-Project" usage comparison
+- Clarified that `.mcp.json` is optional (only needed for project-specific MCP servers)
+- Simplified Quick Start from 5 minutes to 3 minutes (global setup)
+- Updated usage examples to show proactive routing workflow
+
+### 🔍 Research & Validation
+- Investigated UserPromptSubmit hook capabilities for automatic routing
+- Confirmed global hooks are as reliable as project-level hooks
+- Documented hook limitations (can't prepend to prompt text)
+- Validated proactive agent invocation as best practice
+
+### ⚠️ Migration Notes
+If you're upgrading from v2.0:
+1. Copy agents to global directory: `cp agents/*.md ~/.claude/agents/`
+2. Remove per-project agents if desired (optional, both work)
+3. Restart VS Code to load global agents
+4. Remind Claude to use task-router proactively in new sessions
+
 ## [2.0.1] - 2026-01-01
 
 ### 📖 Documentation Updates

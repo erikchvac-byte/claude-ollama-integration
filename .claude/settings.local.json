@@ -20,7 +20,31 @@
       "Bash(tasklist:*)",
       "Bash(powershell -Command \"Get-Process ollama | Select-Object Id,ProcessName,StartTime,Path | Format-List\")",
       "Bash(powershell -Command \"Get-ScheduledTask | Where-Object {$_TaskName -like ''*ollama*''} | Format-Table TaskName,State\")",
-      "Bash(reg query \"HKCU\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\")"
+      "Bash(reg query \"HKCU\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\")",
+      "Bash(Test-Path \"C:\\\\Users\\\\erikc\\\\.claude\\\\mcp-servers\\\\ollama-mcp-server\\\\index.js\")",
+      "Bash(Test-Path \".mcp.json\")",
+      "Bash(Test-Path \".claude\\\\agents\")",
+      "Bash(powershell -Command \"Test-Path ''C:\\\\Users\\\\erikc\\\\.claude\\\\mcp-servers\\\\ollama-mcp-server\\\\index.js''\")",
+      "Bash(powershell -Command \"Test-Path ''.mcp.json''\")",
+      "Bash(powershell -Command \"Test-Path ''.claude\\\\agents''\")",
+      "Bash(powershell -Command \"Get-Process | Where-Object {$_ProcessName -like ''*ollama*''}\")",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(dir .claudehooks)",
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(dir:*)",
+      "Bash(powershell -Command \"Test-Path ''.claude\\\\hooks\\\\SessionStart.md''\")",
+      "Bash(powershell -Command \"Start-Process -FilePath ''ollama'' -ArgumentList ''serve'' -WindowStyle Hidden\")",
+      "Bash(powershell -Command \"$action = New-ScheduledTaskAction -Execute ''ollama.exe'' -Argument ''serve''; $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME; $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0; Register-ScheduledTask -TaskName ''OllamaAutoStart'' -Action $action -Trigger $trigger -Settings $settings -Description ''Auto-start Ollama on Windows login'' -Force\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(powershell -Command \"Get-ScheduledTask -TaskName ''OllamaAutoStart'' | Select-Object TaskName, State, Description | Format-List\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd Windows Scheduled Task for reliable Ollama auto-start\n\n- Created create-ollama-startup-task.ps1 script\n- Sets up OllamaAutoStart task that runs at Windows login\n- More reliable than SessionStart hook \\(which doesn''t work in VSCode extension\\)\n- Added WINDOWS_STARTUP_TASK.md documentation\n- Updated README with new auto-start instructions\n\nIssue: SessionStart hook doesn''t execute in VSCode extension environment\nSolution: Windows Scheduled Task triggers at login, system-wide\n\nTask Details:\n- Name: OllamaAutoStart\n- Trigger: At user login\n- Action: ollama.exe serve\n- Battery-friendly, no execution timeout\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(curl http://localhost:11434/api/tags)",
+      "Bash(powershell -Command \"Test-Path ''$env:USERPROFILE\\\\.claude\\\\settings.json''\")",
+      "Bash(powershell -Command \"if \\(!\\(Test-Path ''$env:USERPROFILE\\\\.claude''\\)\\) { New-Item -ItemType Directory -Path ''$env:USERPROFILE\\\\.claude'' -Force | Out-Null }\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File ./setup-global-config.ps1)",
+      "Bash(del setup-global-config.ps1)",
+      "Bash(powershell -Command \"Get-ChildItem -Path . -Filter ''*.md'' | Select-Object Name | Sort-Object Name\")"
     ]
   }
 }

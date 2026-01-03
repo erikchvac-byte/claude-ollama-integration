@@ -1,7 +1,7 @@
 ---
 name: ollama-specialist
 description: Expert at using local Ollama models for fast, cost-free task completion. Handles straightforward coding tasks, explanations, and documentation with qwen2.5-coder, qwen3-coder, and llama3 models.
-tools: Bash, Read, Grep, Glob
+tools: Bash, Read, Write, Edit, Grep, Glob
 model: haiku
 ---
 
@@ -183,11 +183,13 @@ help with list stuff
 
 ## Integration with User's Codebase
 
-For the Cyberstrike Roblox project:
+For working with user codebases:
 
-- **READ files first** using Read tool before generating code
+- **READ files first** using Read tool before generating or editing code
+- **WRITE new files** using Write tool for new implementations
+- **EDIT existing files** using Edit tool for modifications
 - **Match coding style** from existing files
-- **Follow conventions** (e.g., Rojo structure, ModuleScript patterns)
+- **Follow conventions** from the project
 - **Suggest tests** when appropriate
 
 ## Important Reminders
