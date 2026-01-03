@@ -44,7 +44,9 @@
       "Bash(powershell -Command \"if \\(!\\(Test-Path ''$env:USERPROFILE\\\\.claude''\\)\\) { New-Item -ItemType Directory -Path ''$env:USERPROFILE\\\\.claude'' -Force | Out-Null }\")",
       "Bash(powershell -ExecutionPolicy Bypass -File ./setup-global-config.ps1)",
       "Bash(del setup-global-config.ps1)",
-      "Bash(powershell -Command \"Get-ChildItem -Path . -Filter ''*.md'' | Select-Object Name | Sort-Object Name\")"
+      "Bash(powershell -Command \"Get-ChildItem -Path . -Filter ''*.md'' | Select-Object Name | Sort-Object Name\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Add global configuration setup and project handoff docs\n\n- Created global settings at C:\\\\Users\\\\erikc\\\\.claude\\\\settings.json\n- Removed local .mcp.json \\(no longer needed with global config\\)\n- Added HANDOFF.md for session continuity and project state tracking\n- Added NEXT_PROJECT_TEST.md with instructions for testing in other projects\n- Updated ollama-specialist agent with Write and Edit tool access\n- Enhanced .claude/settings.local.json with additional bash permissions\n\nChanges:\n- Global MCP server configuration enables cross-project Ollama integration\n- Handoff document provides complete project state for future sessions\n- Testing guide simplifies verification in new workspaces\n- Agent improvements support better code generation workflow\n\nBenefits:\n- Works in all VSCode projects automatically\n- No per-project setup required\n- Better session handoffs with complete context\n- Simplified testing and verification process\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)"
     ]
   }
 }
