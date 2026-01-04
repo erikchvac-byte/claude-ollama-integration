@@ -38,9 +38,14 @@ Available on the user's system (optimized selection):
 ## Task Execution Strategy
 
 1. **Select the right model** based on task complexity
-2. **Query using `ollama_query` MCP tool** with clear prompt
-3. **Present the response** with proper formatting
-4. **Evaluate quality** - if insufficient, suggest Claude escalation
+2. **For code generation tasks**: Use context injection to prevent hallucinations
+   - Set `inject_api_context: true`
+   - Pass `context_files` array with relevant source files
+   - Add system prompt warning against hallucinations
+3. **Query using `ollama_query` MCP tool** with clear prompt
+4. **Check for hallucination warnings** in response
+5. **Present the response** with proper formatting
+6. **Evaluate quality** - if insufficient or hallucinations detected, escalate to Claude
 
 ## Model Selection Guide
 
@@ -179,6 +184,100 @@ the sum of all even numbers. Use list comprehension.
 Poor prompt:
 ```
 help with list stuff
+```
+
+## Preventing API Hallucinations (NEW - v2.1)
+
+**The Problem:** Smaller Ollama models (especially qwen2.5-coder:7b and below) can invent non-existent library methods, causing runtime failures.
+
+**The Solution:** Context injection - tell the model exactly what APIs are available.
+
+### When to Use Context Injection:
+
+✅ **USE for code generation tasks:**
+- Writing new functions that use libraries/frameworks
+- Modifying code that imports external dependencies
+- Working with project-specific APIs
+
+❌ **SKIP for:**
+- Pure explanations or documentation
+- Simple algorithmic tasks (no external APIs)
+- Format conversions
+
+### How to Use Context Injection:
+
+```javascript
+// Example: Writing code that uses Node.js fs module
+ollama_query({
+  model: "qwen2.5-coder:7b",
+  prompt: "Write a function to read a JSON file and parse it",
+  inject_api_context: true,
+  context_files: ["path/to/file-using-fs.js"],  // File that imports 'fs'
+  system_prompt: "Only use APIs from the provided list. If an API is not listed, return ERROR: API_NOT_AVAILABLE instead of guessing."
+})
+```
+
+**What happens:**
+1. Context extractor reads imports from `context_files`
+2. Available APIs are injected into the prompt (e.g., "Available APIs: fs.readFile, fs.writeFile...")
+3. Ollama generates code using only documented APIs
+4. Post-processing detects any hallucinated methods
+5. Warning appears if undocumented APIs are used
+
+### Handling Hallucination Warnings:
+
+If the response contains:
+```
+⚠️ Hallucination Warning: The following APIs were not found in the available context:
+- fs.magicRead
+- path.superResolve
+```
+
+**Actions:**
+1. **Review the code** - are these real methods the model invented?
+2. **If hallucinations confirmed:**
+   - **Option A:** Escalate to Claude Specialist (recommended)
+   - **Option B:** Retry with more explicit context files
+   - **Option C:** Add correct API to context extractor's knownAPIs
+3. **Inform the user** about the issue and your chosen action
+
+### Example with Context Injection:
+
+```
+User task: "Write code to read a configuration file in my Node.js app"
+
+[Complexity analysis: score=28, OLLAMA_PREFERRED]
+[Selected model: qwen2.5-coder:7b]
+[Detected: Code generation task involving file I/O]
+[Action: Enabling context injection]
+
+[Reading existing files to find imports...]
+[Found: src/utils/fileHandler.js imports 'fs', 'path']
+
+[Calling ollama_query with:]
+- inject_api_context: true
+- context_files: ["src/utils/fileHandler.js"]
+- system_prompt: "Only use APIs from the Available APIs list..."
+
+Response from Ollama:
+const fs = require('fs');
+const path = require('path');
+
+function readConfig(configPath) {
+  const fullPath = path.resolve(configPath);
+  const data = fs.readFileSync(fullPath, 'utf8');
+  return JSON.parse(data);
+}
+
+📊 Performance:
+- Latency: 2143ms
+- Tokens (input/output): 145/89
+- ✓ No hallucinations detected
+
+[Quality check: ✓ Uses documented APIs, ✓ No invented methods]
+[Presenting to user with confidence]
+
+Cost savings: $0.07 vs Claude API
 ```
 
 ## Integration with User's Codebase

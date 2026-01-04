@@ -9,25 +9,27 @@ const {
 const OllamaClient = require("./ollama-client");
 const TaskAnalyzer = require("./task-complexity-analyzer");
 const RoutingLogger = require("./routing-logger");
+const ContextExtractor = require("./context-extractor");
 
 const server = new Server({
   name: "ollama-mcp-server",
-  version: "2.0.0",
+  version: "2.1.0", // Bumped version for hardening features
 }, {
   capabilities: {
     tools: {},
   },
 });
 
-const ollamaClient = new OllamaClient(process.env.OLLAMA_BASE_URL || "http://localhost:11434");
-const taskAnalyzer = new TaskAnalyzer();
 const routingLogger = new RoutingLogger();
+const ollamaClient = new OllamaClient(process.env.OLLAMA_BASE_URL || "http://localhost:11434", routingLogger);
+const taskAnalyzer = new TaskAnalyzer();
+const contextExtractor = new ContextExtractor();
 
 // Define available tools
 const tools = [
   {
     name: "ollama_query",
-    description: "Query a local Ollama model for fast, cost-free task completion. Best for simple code tasks, explanations, and documentation.",
+    description: "Query a local Ollama model for fast, cost-free task completion. Best for simple code tasks, explanations, and documentation. Supports context injection to prevent API hallucinations.",
     inputSchema: {
       type: "object",
       properties: {
@@ -48,6 +50,20 @@ const tools = [
           type: "integer",
           description: "Maximum tokens in response",
           default: 1000,
+        },
+        system_prompt: {
+          type: "string",
+          description: "Optional system instruction to prepend to the prompt",
+        },
+        context_files: {
+          type: "array",
+          items: { type: "string" },
+          description: "File paths to extract API context from (prevents hallucinations)",
+        },
+        inject_api_context: {
+          type: "boolean",
+          description: "Auto-extract and inject available APIs from context_files",
+          default: false,
         },
       },
       required: ["model", "prompt"],
@@ -159,6 +175,27 @@ const tools = [
       properties: {},
     },
   },
+  {
+    name: "get_execution_stats",
+    description: "Get performance metrics and statistics about Ollama query executions. Shows latency, token usage, success rates, and hallucination detection rates.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        model: {
+          type: "string",
+          description: "Filter by specific model name (optional)",
+        },
+        startDate: {
+          type: "string",
+          description: "Filter by start date ISO-8601 format (optional)",
+        },
+        endDate: {
+          type: "string",
+          description: "Filter by end date ISO-8601 format (optional)",
+        },
+      },
+    },
+  },
 ];
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -184,6 +221,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return await handleGetStats();
       case "analyze_routing_patterns":
         return await handleAnalyzePatterns();
+      case "get_execution_stats":
+        return await handleGetExecutionStats(args);
       default:
         return {
           isError: true,
@@ -199,18 +238,54 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 async function handleOllamaQuery(args) {
-  const { model, prompt, temperature, max_tokens } = args;
+  const { model, prompt, temperature, max_tokens, system_prompt, context_files, inject_api_context } = args;
+
   try {
-    const response = await ollamaClient.query(model, prompt, {
+    let enhancedPrompt = prompt;
+    let availableAPIs = [];
+
+    // Inject API context if requested
+    if (inject_api_context && context_files && context_files.length > 0) {
+      const apiContext = contextExtractor.buildAPIContext(context_files);
+      availableAPIs = contextExtractor.getAvailableAPIs(
+        context_files.flatMap(f => contextExtractor.extractImportsFromFile(f))
+      );
+
+      if (apiContext) {
+        enhancedPrompt = `${system_prompt || ''}\n\n${apiContext}\n\n${prompt}`;
+      } else if (system_prompt) {
+        enhancedPrompt = `${system_prompt}\n\n${prompt}`;
+      }
+    } else if (system_prompt) {
+      enhancedPrompt = `${system_prompt}\n\n${prompt}`;
+    }
+
+    const result = await ollamaClient.query(model, enhancedPrompt, {
       temperature: temperature || 0.7,
       num_predict: max_tokens || 1000,
+      availableAPIs: availableAPIs.length > 0 ? availableAPIs : undefined,
     });
+
+    let responseText = `**Ollama Response (${model}):**\n\n${result.response}`;
+
+    // Add hallucination warnings if detected
+    if (result.metadata.hallucination_detected) {
+      responseText += `\n\n⚠️ **Hallucination Warning:** The following APIs were not found in the available context:\n`;
+      result.metadata.hallucinations.forEach(api => {
+        responseText += `- ${api}\n`;
+      });
+    }
+
+    // Add performance metrics
+    responseText += `\n\n📊 **Performance:**\n`;
+    responseText += `- Latency: ${result.metadata.latency_ms}ms\n`;
+    responseText += `- Tokens (input/output): ${result.metadata.tokens_input}/${result.metadata.tokens_output}\n`;
 
     return {
       content: [
         {
           type: "text",
-          text: `**Ollama Response (${model}):**\n\n${response}`,
+          text: responseText,
         },
       ],
     };
@@ -434,7 +509,54 @@ async function handleAnalyzePatterns() {
   }
 }
 
+async function handleGetExecutionStats(args) {
+  try {
+    const filters = {};
+    if (args.model) filters.model = args.model;
+    if (args.startDate) filters.startDate = args.startDate;
+    if (args.endDate) filters.endDate = args.endDate;
+
+    const stats = routingLogger.getExecutionStats(filters);
+
+    if (stats.total === 0) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "No execution metrics logged yet. Start using ollama_query to build a performance history!",
+          },
+        ],
+      };
+    }
+
+    let output = `**Execution Performance Statistics**\n\n`;
+    output += `**Total Queries:** ${stats.total}\n`;
+    output += `- Success Rate: ${stats.successRate}\n`;
+    output += `- Hallucination Rate: ${stats.hallucinationRate}\n\n`;
+
+    output += `**Performance by Model:**\n`;
+    for (const [model, modelStats] of Object.entries(stats.byModel)) {
+      output += `\n**${model}:**\n`;
+      output += `- Queries: ${modelStats.queries}\n`;
+      output += `- Avg Latency: ${modelStats.avgLatency_ms}ms\n`;
+      output += `- Avg Tokens (in/out): ${modelStats.avgTokensInput}/${modelStats.avgTokensOutput}\n`;
+      output += `- Success Rate: ${modelStats.successRate}\n`;
+      output += `- Hallucination Rate: ${modelStats.hallucinationRate}\n`;
+      output += `- Total Tokens Processed: ${modelStats.totalTokens}\n`;
+    }
+
+    return {
+      content: [{ type: "text", text: output }],
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text", text: `Stats retrieval failed: ${error.message}` }]
+    };
+  }
+}
+
 const transport = new StdioServerTransport();
 server.connect(transport);
 
-console.error("Ollama MCP Server v2.0 started successfully (with routing logger)");
+console.error("Ollama MCP Server v2.1.0 started successfully (with telemetry and context injection)");
